@@ -1,0 +1,7 @@
+[ 2026-01-27 18:10:14,402] 23 root - INFO - Data Ingestion started
+[ 2026-01-27 18:10:14,477] 35 root - INFO - Ingestion complete
+[ 2026-01-27 18:10:14,544] 17 root - INFO - Feature Engineering started
+[ 2026-01-27 18:10:14,575] 17 root - INFO - Feature Engineering started
+[ 2026-01-27 18:10:14,585] 13 root - INFO - Saving object to: artifacts\preprocessor.pkl
+[ 2026-01-27 18:10:14,591] 22 root - INFO - Splitting train and test array
+[ 2026-01-27 18:10:14,591] 40 root - INFO - Training Ensemble Model
