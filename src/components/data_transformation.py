@@ -23,18 +23,12 @@ class DataTransformation:
 
     def get_data_transformer_object(self):
         try:
-            logging.info("Creating Preprocessing Pipeline")
-            
-            # Sirf wahi numerical columns jo humein chahiye
             numerical_columns = ['tenure', 'MonthlyCharges', 'TotalCharges', 'ServiceCount']
-
-            # Sirf wahi categorical columns jo model ke liye zaroori hain
-            # Maine 'gender' aur 'PhoneService' yahan se hata diye hain taaki error na aaye
             categorical_columns = [
-                'SeniorCitizen', 'Partner', 'Dependents', 'MultipleLines', 'InternetService', 
-                'OnlineSecurity', 'OnlineBackup', 'DeviceProtection', 'TechSupport', 
-                'StreamingTV', 'StreamingMovies', 'Contract', 'PaperlessBilling', 
-                'PaymentMethod', 'tenure_group', 'gender', 'PhoneService'
+                'gender', 'SeniorCitizen', 'Partner', 'Dependents', 'PhoneService', 
+                'MultipleLines', 'InternetService', 'OnlineSecurity', 'OnlineBackup', 
+                'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies', 
+                'Contract', 'PaperlessBilling', 'PaymentMethod', 'tenure_group'
             ]
 
             num_pipeline = Pipeline(steps=[
@@ -45,16 +39,14 @@ class DataTransformation:
             cat_pipeline = Pipeline(steps=[
                 ('imputer', SimpleImputer(strategy='most_frequent')),
                 ('one_hot_encoder', OneHotEncoder(handle_unknown='ignore', sparse_output=False)),
-                ('scaler', StandardScaler()) # Scaling after encoding for stability
+                ('scaler', StandardScaler())
             ])
 
-            # remainder='drop' ensures ki gender, customerID etc model tak na jayein
             preprocessor = ColumnTransformer([
                 ('num_pipeline', num_pipeline, numerical_columns),
                 ('cat_pipeline', cat_pipeline, categorical_columns)
             ], remainder='drop') 
 
-            # Adding Feature Engineering to the main Pipeline
             return Pipeline(steps=[
                 ('feature_engine', FeatureEngine()),
                 ('preprocessing', preprocessor)
@@ -68,33 +60,22 @@ class DataTransformation:
             train_df = pd.read_csv(train_path)
             test_df = pd.read_csv(test_path)
 
-            logging.info("Read train and test data completed")
-            
             preprocessing_obj = self.get_data_transformer_object()
-            
             target_col = "Churn"
             
-            # Separate features and target
             X_train = train_df.drop(columns=[target_col], axis=1)
-            y_train = train_df[target_col].map({'Yes': 1, 'No': 0})
+            y_train = train_df[target_col].map({'Yes': 1, 'No': 0}).astype(int)
 
             X_test = test_df.drop(columns=[target_col], axis=1)
-            y_test = test_df[target_col].map({'Yes': 1, 'No': 0})
+            y_test = test_df[target_col].map({'Yes': 1, 'No': 0}).astype(int)
 
-            logging.info("Applying fit_transform on training data")
             train_arr_processed = preprocessing_obj.fit_transform(X_train)
-            
-            logging.info("Applying transform on testing data")
             test_arr_processed = preprocessing_obj.transform(X_test)
 
-            # Creating final numpy arrays
             train_arr = np.c_[train_arr_processed, np.array(y_train)]
             test_arr = np.c_[test_arr_processed, np.array(y_test)]
 
-            save_object(
-                file_path=self.data_transformation_config.preprocessor_obj_file_path, 
-                obj=preprocessing_obj
-            )
+            save_object(file_path=self.data_transformation_config.preprocessor_obj_file_path, obj=preprocessing_obj)
 
             return train_arr, test_arr, self.data_transformation_config.preprocessor_obj_file_path
         except Exception as e:

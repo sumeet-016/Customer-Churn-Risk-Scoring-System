@@ -1,0 +1,7 @@
+[ 2026-01-28 09:03:37,412] 20 root - INFO - Data Ingestion started
+[ 2026-01-28 09:03:37,485] 32 root - INFO - Ingestion complete
+[ 2026-01-28 09:03:37,547] 17 root - INFO - Feature Engineering started
+[ 2026-01-28 09:03:37,579] 17 root - INFO - Feature Engineering started
+[ 2026-01-28 09:03:37,588] 13 root - INFO - Saving object to: artifacts\preprocessor.pkl
+[ 2026-01-28 09:03:37,591] 40 root - INFO - Training ensemble model
+[ 2026-01-28 09:03:39,349] 13 root - INFO - Saving object to: artifacts\model.pkl
