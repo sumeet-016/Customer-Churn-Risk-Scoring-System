@@ -1,0 +1,14 @@
+Metadata-Version: 2.4
+Name: CustomerChurnScoring
+Version: 0.0.1
+Author: Data Scientist
+Author-email: pal_sumeetkumar@gmail.com
+Requires-Dist: pandas
+Requires-Dist: numpy
+Requires-Dist: scikit-learn
+Requires-Dist: catboost
+Requires-Dist: dill
+Requires-Dist: streamlit
+Dynamic: author
+Dynamic: author-email
+Dynamic: requires-dist

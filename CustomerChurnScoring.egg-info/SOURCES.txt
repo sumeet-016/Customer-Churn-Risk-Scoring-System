@@ -1,0 +1,6 @@
+setup.py
+CustomerChurnScoring.egg-info/PKG-INFO
+CustomerChurnScoring.egg-info/SOURCES.txt
+CustomerChurnScoring.egg-info/dependency_links.txt
+CustomerChurnScoring.egg-info/requires.txt
+CustomerChurnScoring.egg-info/top_level.txt
