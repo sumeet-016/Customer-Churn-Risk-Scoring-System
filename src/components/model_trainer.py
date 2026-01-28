@@ -25,7 +25,6 @@ class ModelTrainer:
                 test_array[:, -1]
             )
 
-            # Important: Ensure labels are integers
             y_train = y_train.astype(int)
 
             lr = LogisticRegression(solver='liblinear', C=10, max_iter=1000)

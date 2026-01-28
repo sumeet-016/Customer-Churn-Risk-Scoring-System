@@ -10,22 +10,17 @@ class PredictPipeline:
 
     def predict(self, features):
         try:
-            # Define paths to saved artifacts
             model_path = os.path.join("artifacts", "model.pkl")
             preprocessor_path = os.path.join("artifacts", "preprocessor.pkl")
 
-            # Load the 'Brain' and 'Glasses' of your model
             model = load_object(file_path=model_path)
             preprocessor = load_object(file_path=preprocessor_path)
 
-            # Transform raw input. 
-            # Note: This automatically applies FeatureEngine + Scaling + Encoding
             data_transformed = preprocessor.transform(features)
             
-            # Get probability scores instead of hard classes
             preds_proba = model.predict_proba(data_transformed)[:, 1]
 
-            # Apply your tuned 0.35 threshold
+            # Applied tuned 0.35 threshold
             predictions = (preds_proba >= 0.35).astype(int)
 
             return predictions
