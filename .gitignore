@@ -205,3 +205,19 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+# ML artifacts (VERY IMPORTANT)
+artifacts/
+logs/
+catboost_info/
+models/
+*.pkl
+*.joblib
+
+# Data files
+data/
+*.csv
+*.xlsx
+
+# OS files
+.DS_Store
+Thumbs.db
