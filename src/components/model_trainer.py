@@ -25,22 +25,51 @@ class ModelTrainer:
                 test_array[:, -1]
             )
 
+            # ✅ Cast both to int
             y_train = y_train.astype(int)
+            y_test  = y_test.astype(int)
 
-            lr = LogisticRegression(solver='liblinear', C=10, max_iter=1000)
-            gb = GradientBoostingClassifier(n_estimators=100, max_depth=4, learning_rate=0.05, random_state=42)
-            cb = CatBoostClassifier(iterations=200, depth=6, learning_rate=0.01, verbose=0, random_state=42)
+            lr = LogisticRegression(
+                solver='liblinear',
+                C=10,
+                max_iter=1000,
+                class_weight='balanced',
+                random_state=42
+            )
+
+            gb = GradientBoostingClassifier(
+                n_estimators=200,
+                max_depth=4,
+                learning_rate=0.05,
+                random_state=42
+            )
+
+            cb = CatBoostClassifier(
+                iterations=300,
+                depth=6,
+                learning_rate=0.05,
+                auto_class_weights='Balanced',
+                verbose=0,
+                random_state=42
+            )
 
             ensemble = VotingClassifier(
                 estimators=[('lr', lr), ('gb', gb), ('cb', cb)],
-                voting='soft'
+                voting='soft',
+                weights=[1, 2, 2]
             )
 
-            logging.info("Training ensemble model")
+            logging.info("Training ensemble model...")
             ensemble.fit(X_train, y_train)
+            logging.info("Training complete")
 
-            save_object(file_path=self.model_trainer_config.trained_model_file_path, obj=ensemble)
-            
+            save_object(
+                file_path=self.model_trainer_config.trained_model_file_path,
+                obj=ensemble
+            )
+
+            logging.info(f"Model saved at: {self.model_trainer_config.trained_model_file_path}")
+
             return self.model_trainer_config.trained_model_file_path
 
         except Exception as e:

@@ -2,86 +2,105 @@ import sys
 import os
 import pandas as pd
 from src.exception import CustomException
+from src.logger import logging
 from src.utils import load_object
 
 class PredictPipeline:
     def __init__(self):
-        pass
+        # ✅ Load once at startup — not on every prediction call
+        model_path        = os.path.join("artifacts", "model.pkl")
+        preprocessor_path = os.path.join("artifacts", "preprocessor.pkl")
 
-    def predict(self, features):
+        logging.info("Loading model and preprocessor")
+        self.model        = load_object(file_path=model_path)
+        self.preprocessor = load_object(file_path=preprocessor_path)
+        logging.info("Model and preprocessor loaded successfully")
+
+    def predict(self, features: pd.DataFrame):
         try:
-            model_path = os.path.join("artifacts", "model.pkl")
-            preprocessor_path = os.path.join("artifacts", "preprocessor.pkl")
+            # ─── Transform ────────────────────────────────────────────────
+            data_transformed = self.preprocessor.transform(features)
 
-            model = load_object(file_path=model_path)
-            preprocessor = load_object(file_path=preprocessor_path)
+            # ─── Predict Probability ──────────────────────────────────────
+            churn_probability = self.model.predict_proba(data_transformed)[:, 1]
 
-            data_transformed = preprocessor.transform(features)
-            
-            preds_proba = model.predict_proba(data_transformed)[:, 1]
+            # ─── Apply Tuned Threshold ────────────────────────────────────
+            # 0.35 threshold improves Recall — catches more actual churners
+            churn_prediction = (churn_probability >= 0.35).astype(int)
 
-            # Applied tuned 0.35 threshold
-            predictions = (preds_proba >= 0.35).astype(int)
-
-            return predictions
+            return churn_prediction[0], round(float(churn_probability[0]) * 100, 2)
+            # returns: (0 or 1,  probability as percentage e.g. 74.23)
 
         except Exception as e:
             raise CustomException(e, sys)
 
-class CustomData:
-    """
-    This class maps individual UI/Form inputs into a format 
-    that the model understands (a DataFrame).
-    """
-    def __init__(self, gender, SeniorCitizen, Partner, Dependents, tenure, PhoneService, 
-                 MultipleLines, InternetService, OnlineSecurity, OnlineBackup, 
-                 DeviceProtection, TechSupport, StreamingTV, StreamingMovies, 
-                 Contract, PaperlessBilling, PaymentMethod, MonthlyCharges, TotalCharges):
-        
-        self.gender = gender
-        self.SeniorCitizen = SeniorCitizen
-        self.Partner = Partner
-        self.Dependents = Dependents
-        self.tenure = tenure
-        self.PhoneService = PhoneService
-        self.MultipleLines = MultipleLines
-        self.InternetService = InternetService
-        self.OnlineSecurity = OnlineSecurity
-        self.OnlineBackup = OnlineBackup
-        self.DeviceProtection = DeviceProtection
-        self.TechSupport = TechSupport
-        self.StreamingTV = StreamingTV
-        self.StreamingMovies = StreamingMovies
-        self.Contract = Contract
-        self.PaperlessBilling = PaperlessBilling
-        self.PaymentMethod = PaymentMethod
-        self.MonthlyCharges = MonthlyCharges
-        self.TotalCharges = TotalCharges
 
-    def get_data_as_data_frame(self):
+class CustomData:
+    def __init__(
+        self,
+        gender          : str,
+        SeniorCitizen   : int,
+        Partner         : str,
+        Dependents      : str,
+        tenure          : int,
+        PhoneService    : str,
+        MultipleLines   : str,
+        InternetService : str,
+        OnlineSecurity  : str,
+        OnlineBackup    : str,
+        DeviceProtection: str,
+        TechSupport     : str,
+        StreamingTV     : str,
+        StreamingMovies : str,
+        Contract        : str,
+        PaperlessBilling: str,
+        PaymentMethod   : str,
+        MonthlyCharges  : float,
+        TotalCharges    : float,
+    ):
+        self.gender           = gender
+        self.SeniorCitizen    = SeniorCitizen
+        self.Partner          = Partner
+        self.Dependents       = Dependents
+        self.tenure           = tenure
+        self.PhoneService     = PhoneService
+        self.MultipleLines    = MultipleLines
+        self.InternetService  = InternetService
+        self.OnlineSecurity   = OnlineSecurity
+        self.OnlineBackup     = OnlineBackup
+        self.DeviceProtection = DeviceProtection
+        self.TechSupport      = TechSupport
+        self.StreamingTV      = StreamingTV
+        self.StreamingMovies  = StreamingMovies
+        self.Contract         = Contract
+        self.PaperlessBilling = PaperlessBilling
+        self.PaymentMethod    = PaymentMethod
+        self.MonthlyCharges   = MonthlyCharges
+        self.TotalCharges     = TotalCharges
+
+    def get_data_as_data_frame(self) -> pd.DataFrame:
         try:
-            custom_data_input_dict = {
-                "gender": [self.gender],
-                "SeniorCitizen": [self.SeniorCitizen],
-                "Partner": [self.Partner],
-                "Dependents": [self.Dependents],
-                "tenure": [self.tenure],
-                "PhoneService": [self.PhoneService],
-                "MultipleLines": [self.MultipleLines],
-                "InternetService": [self.InternetService],
-                "OnlineSecurity": [self.OnlineSecurity],
-                "OnlineBackup": [self.OnlineBackup],
+            return pd.DataFrame({
+                "gender"          : [self.gender],
+                "SeniorCitizen"   : [int(self.SeniorCitizen)],
+                "Partner"         : [self.Partner],
+                "Dependents"      : [self.Dependents],
+                "tenure"          : [int(self.tenure)],
+                "PhoneService"    : [self.PhoneService],
+                "MultipleLines"   : [self.MultipleLines],
+                "InternetService" : [self.InternetService],
+                "OnlineSecurity"  : [self.OnlineSecurity],
+                "OnlineBackup"    : [self.OnlineBackup],
                 "DeviceProtection": [self.DeviceProtection],
-                "TechSupport": [self.TechSupport],
-                "StreamingTV": [self.StreamingTV],
-                "StreamingMovies": [self.StreamingMovies],
-                "Contract": [self.Contract],
+                "TechSupport"     : [self.TechSupport],
+                "StreamingTV"     : [self.StreamingTV],
+                "StreamingMovies" : [self.StreamingMovies],
+                "Contract"        : [self.Contract],
                 "PaperlessBilling": [self.PaperlessBilling],
-                "PaymentMethod": [self.PaymentMethod],
-                "MonthlyCharges": [self.MonthlyCharges],
-                "TotalCharges": [self.TotalCharges],
-            }
-            return pd.DataFrame(custom_data_input_dict)
+                "PaymentMethod"   : [self.PaymentMethod],
+                "MonthlyCharges"  : [float(self.MonthlyCharges)],
+                "TotalCharges"    : [float(self.TotalCharges)],
+            })
 
         except Exception as e:
             raise CustomException(e, sys)
